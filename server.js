@@ -15,11 +15,19 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "*",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (
+        origin.startsWith("http://localhost") ||
+        origin === process.env.FRONTEND_URL
+      ) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   }),
 );
-
 // Routes
 app.use("/", authRoutes);
 app.use("/crypto", cryptoRoutes);
